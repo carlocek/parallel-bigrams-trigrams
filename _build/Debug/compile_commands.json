@@ -1,0 +1,7 @@
+[
+{
+  "directory": "/cygdrive/c/Users/carlo/eclipse-workspace/parallel-bigrams-trigrams/_build/Debug",
+  "command": "/usr/bin/c++.exe    -fopenmp -g -std=gnu++11 -o CMakeFiles/main.dir/C_/Users/carlo/eclipse-workspace/parallel-bigrams-trigrams/main.cpp.o -c C:/Users/carlo/eclipse-workspace/parallel-bigrams-trigrams/main.cpp",
+  "file": "C:/Users/carlo/eclipse-workspace/parallel-bigrams-trigrams/main.cpp"
+}
+]

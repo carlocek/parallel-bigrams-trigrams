@@ -1,0 +1,3 @@
+/cygdrive/c/Users/carlo/eclipse-workspace/parallel-bigrams-trigrams/_build/Debug/CMakeFiles/main.dir
+/cygdrive/c/Users/carlo/eclipse-workspace/parallel-bigrams-trigrams/_build/Debug/CMakeFiles/edit_cache.dir
+/cygdrive/c/Users/carlo/eclipse-workspace/parallel-bigrams-trigrams/_build/Debug/CMakeFiles/rebuild_cache.dir

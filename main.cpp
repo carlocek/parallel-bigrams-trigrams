@@ -1,9 +1,3 @@
-/*
- * parallel.cpp
- *
- *  Created on: 23 gen 2023
- *      Author: carlo
- */
 #include <stdlib.h>
 #include <iostream>
 #include <fstream>

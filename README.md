@@ -1,0 +1,2 @@
+# Parallel bigrams/trigrams
+this repo contains a project for confronting sequential and parallel versions of a program that counts the frequencies og bigrams and trigrams of both chars and words in a text file

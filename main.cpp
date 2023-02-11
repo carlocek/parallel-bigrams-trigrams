@@ -88,6 +88,7 @@ int main()
 	string textSpaced = text;
 	//use text for bigrams/trigrams of chars
 	text.erase(remove_if(text.begin(), text.end(), ::isspace), text.end());
+	cout << text.size() << endl;
 
 	//divides text in vectors of bigrams/trigrams of chars
 	vector<string> bigramsChars = tokenizeCharsNgrams(text, 2);

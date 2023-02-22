@@ -1,4 +1,7 @@
-/HeartOfDarkness-JosephConrad.txt
+/books/
+/Release/
+/*.stackdump
+/prova.txt
 /.settings/
 /.project
 /.cproject

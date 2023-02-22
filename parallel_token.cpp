@@ -30,11 +30,11 @@ using namespace std;
 int main()
 {
 	//ifstream file("prova.txt");
-	ifstream file1("books/GreatExpectations.txt");//1MB
-	ifstream file2("books/CrimeAndPunishment.txt");//1.14MB
-	ifstream file3("books/DonQuixote.txt");//2.28MB
-	ifstream file4("books/TheCountOfMontecristo.txt");//2.65MB
-	ifstream file5("books/WarAndPeace.txt");//3.20MB
+	ifstream file1("books/GreatExpectations.txt");
+	ifstream file2("books/CrimeAndPunishment.txt");
+	ifstream file3("books/DonQuixote.txt");
+	ifstream file4("books/TheCountOfMontecristo.txt");
+	ifstream file5("books/WarAndPeace.txt");
 	stringstream buffer1, buffer2, buffer3, buffer4, buffer5;
 	buffer1 << file1.rdbuf();
 	file1.close();
@@ -72,12 +72,6 @@ int main()
 	unordered_map<string, int> bwFreq[nthreads];
 	unordered_map<string, int> twFreq[nthreads];
 
-	//padding on text to ensure coverage of whole text
-	while(text.size() % nthreads != 0)
-	{
-		text += '%';
-	}
-
 	int textLength = text.size();
 	cout << textLength << endl;
 
@@ -86,29 +80,66 @@ int main()
 	{
 	t1 = chrono::high_resolution_clock::now();
 
-	//compute words vector
-//	vector<string> wordsReduction = parallelTokenizeWords(text, textLength, nthreads);
-	vector<string> wordsReduction = sequentialTokenizeWords(text);
-
-	//padding on words vector to ensure coverage of whole vector
-	while(wordsReduction.size() % nthreads != 0)
+	int pos[nthreads+1];
+	pos[0] = 0;
+	pos[nthreads] = textLength;
+	for(int i = 1; i < nthreads; i++)
 	{
-		wordsReduction.push_back("%");
+		pos[i] = i * (textLength/nthreads);
+		while(!isspace(text[pos[i]-1]))
+		{
+			pos[i]++;
+		}
 	}
+	//declaration of global vector
+	vector<string> wordsReduction;
+	//declaration of private vector to be reduced
+	vector<string> words[nthreads];
 
-	int wordsLength = wordsReduction.size();
-//	cout << wordsLength << endl;
-
-//	int chunksize = (int)(textLength/nthreads);
-//	cout << chunksize << endl;
-
-//	int wchunksize = (int)(wordsLength/nthreads);
-//	cout << wchunksize << endl;
-
-	#pragma omp parallel default(none) shared(text, textLength, wordsReduction, wordsLength, bcFreq, tcFreq, bwFreq, twFreq)
+	#pragma omp parallel default(none) shared(pos, words, text, textLength, wordsReduction, bcFreq, tcFreq, bwFreq, twFreq)
 	{
 		int tid = omp_get_thread_num();
 		int nth = omp_get_num_threads();
+		string word;
+		char c;
+		for(int i = pos[tid]; i < pos[tid+1]; i++)
+		{
+			c = text[i];
+			if(isalpha(c) || isspace(c))
+			{
+				if (isspace(c))
+				{
+					if(!word.empty())
+					{
+						words[tid].push_back(word);
+						word.clear();
+					}
+				}
+				else
+				{
+					word += c;
+				}
+			}
+		}
+
+		#pragma omp barrier
+
+		#pragma omp single
+		{
+			for(int i = 0; i < nth; i++)
+			{
+				for(auto w : words[i])
+					wordsReduction.push_back(w);
+			}
+			while(wordsReduction.size() % nth != 0)
+			{
+				wordsReduction.push_back("%");
+			}
+		}
+		int wordsLength = wordsReduction.size();
+
+		#pragma omp barrier
+
 		int chunkc = textLength/nth;
 		int chunkw = wordsLength/nth;
 		int bcstart, tcstart, bwstart, twstart;
@@ -144,7 +175,6 @@ int main()
 		string twBuf[3];
 		string tmp;
 
-		//#pragma omp barrier
 		for(int i = bcstart; i < bcend; i++)
 		{
 //			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);

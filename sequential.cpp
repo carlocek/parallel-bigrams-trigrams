@@ -54,9 +54,8 @@ int main()
 	int textLength = text.size();
 	cout << textLength << endl;
 
-	float sequentialTimes[10];
-	for(int it = 0; it < 10; it++)
-	{
+//	for(int it = 0; it < 10; it++)
+//	{
 	t1 = chrono::high_resolution_clock::now();
 
 	vector<string> words = sequentialTokenizeWords(text);
@@ -116,13 +115,7 @@ int main()
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
 	printf("\n elapsed time: %f\n", time_span.count());
 	fflush(stdout);
-	}
-
-	double sum = 0;
-	for(int i = 0; i < 10; i++)
-		sum += sequentialTimes[i];
-	double avg = sum / 10;
-	cout << avg << endl;
+//	}
 
 //	for(auto &elem : bcFreq)
 //		cout << elem.first << " --> " << elem.second << endl;

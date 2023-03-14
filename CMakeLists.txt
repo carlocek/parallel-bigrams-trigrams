@@ -3,8 +3,9 @@ project(parallel-bigrams-trigrams)
 
 set(CMAKE_CXX_STANDARD 11)
 
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fopenmp")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O2 -g -fopenmp")
 
-set(SOURCE_FILES parallel.cpp, sequential.cpp, utilities.h)
+set(SOURCE_FILES parallel.cpp, sequential.cpp, parallel_token.cpp, utilities.h)
 add_executable(parallel parallel.cpp utilities.h)
 add_executable(sequential sequential.cpp utilities.h)
+add_executable(parallel_token parallel_token.cpp utilities.h)

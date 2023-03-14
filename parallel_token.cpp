@@ -75,7 +75,6 @@ int main()
 	int textLength = text.size();
 	cout << textLength << endl;
 
-	float parallelTimes[10];
 	for(int it = 0; it < 10; it++)
 	{
 	t1 = chrono::high_resolution_clock::now();
@@ -247,16 +246,9 @@ int main()
 	}
 	t2 = chrono::high_resolution_clock::now();
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-	parallelTimes[it] = time_span.count();
 	printf("\n elapsed time: %f\n", time_span.count());
 	fflush(stdout);
 	}
-	//compute average of execution times
-	double sum = 0;
-	for(int i = 0; i < 10; i++)
-		sum += parallelTimes[i];
-	double avg = sum / 10;
-	cout << avg << endl;
 
 	//PRINT RESULTS
 //	for(auto elem : bcFreqReduction)

@@ -29,7 +29,7 @@ using namespace std;
 
 int main()
 {
-	//ifstream file("prova.txt");
+//	ifstream file1("prova.txt");
 	ifstream file1("books/GreatExpectations.txt");//1MB
 	ifstream file2("books/CrimeAndPunishment.txt");//1.14MB
 	ifstream file3("books/DonQuixote.txt");//2.28MB
@@ -75,15 +75,14 @@ int main()
 	//padding on text to ensure coverage of whole text
 	while(text.size() % nthreads != 0)
 	{
-		text += '%';
+		text += " ";
 	}
 
 	int textLength = text.size();
 	cout << textLength << endl;
 
-	float parallelTimes[10];
-	for(int it = 0; it < 10; it++)
-	{
+//	for(int it = 0; it < 10; it++)
+//	{
 	t1 = chrono::high_resolution_clock::now();
 
 	//compute words vector
@@ -144,7 +143,7 @@ int main()
 		string twBuf[3];
 		string tmp;
 
-		//#pragma omp barrier
+		#pragma omp barrier
 		for(int i = bcstart; i < bcend; i++)
 		{
 //			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);
@@ -217,16 +216,10 @@ int main()
 	}
 	t2 = chrono::high_resolution_clock::now();
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-	parallelTimes[it] = time_span.count();
+//	parallelTimes[it] = time_span.count();
 	printf("\n elapsed time: %f\n", time_span.count());
 	fflush(stdout);
-	}
-	//compute average of execution times
-	double sum = 0;
-	for(int i = 0; i < 10; i++)
-		sum += parallelTimes[i];
-	double avg = sum / 10;
-	cout << avg << endl;
+//	}
 
 	//PRINT RESULTS
 //	for(auto elem : bcFreqReduction)

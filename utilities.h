@@ -7,7 +7,7 @@
 
 using namespace std;
 
-vector<string> sequentialTokenizeWords(string text)
+vector<string> sequentialTokenizeWords(string& text)
 {
 	vector<string> words;
 	string word;
@@ -32,7 +32,7 @@ vector<string> sequentialTokenizeWords(string text)
 	return words;
 }
 
-vector<string> parallelTokenizeWords(string text, int textLength, int nthreads)
+vector<string> parallelTokenizeWords(string& text, int textLength, int nthreads)
 {
 	//compute array of text positions to divide iterations between threads
 	int pos[nthreads+1];

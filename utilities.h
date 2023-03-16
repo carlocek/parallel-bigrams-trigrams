@@ -13,20 +13,17 @@ vector<string> sequentialTokenizeWords(string& text)
 	string word;
 	for(char c : text)
 	{
-		if(isalpha(c) || isspace(c))
+		if(isspace(c))
 		{
-			if (isspace(c))
+			if(!word.empty())
 			{
-				if(!word.empty())
-				{
-					words.push_back(word);
-					word.clear();
-				}
+				words.push_back(word);
+				word.clear();
 			}
-			else
-			{
-				word += c;
-			}
+		}
+		else if(isalpha(c))
+		{
+			word += c;
 		}
 	}
 	return words;
@@ -58,20 +55,17 @@ vector<string> parallelTokenizeWords(string& text, int textLength, int nthreads)
 		for(int i = pos[tid]; i < pos[tid+1]; i++)
 		{
 			c = text[i];
-			if(isalpha(c) || isspace(c))
+			if (isspace(c))
 			{
-				if (isspace(c))
+				if(!word.empty())
 				{
-					if(!word.empty())
-					{
-						words[tid].push_back(word);
-						word.clear();
-					}
+					words[tid].push_back(word);
+					word.clear();
 				}
-				else
-				{
-					word += c;
-				}
+			}
+			else if(isalpha(c))
+			{
+				word += c;
 			}
 		}
 	}

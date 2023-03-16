@@ -27,19 +27,14 @@ int main()
 	stringstream buffer1, buffer2, buffer3, buffer4, buffer5;
 	buffer1 << file1.rdbuf();
 	file1.close();
-//	string book1 = buffer1.str();
 	buffer2 << file2.rdbuf();
 	file2.close();
-//	string book2 = buffer2.str();
 	buffer3 << file3.rdbuf();
 	file3.close();
-//	string book3 = buffer3.str();
 	buffer4 << file4.rdbuf();
 	file4.close();
-//	string book4 = buffer4.str();
 	buffer5 << file5.rdbuf();
 	file5.close();
-//	string book5 = buffer5.str();
 
 	string text = buffer1.str() + buffer2.str() + buffer3.str() + buffer4.str() + buffer5.str();
 
@@ -54,8 +49,8 @@ int main()
 	int textLength = text.size();
 	cout << textLength << endl;
 
-//	for(int it = 0; it < 10; it++)
-//	{
+	for(int it = 0; it < 10; it++)
+	{
 	t1 = chrono::high_resolution_clock::now();
 
 	vector<string> words = sequentialTokenizeWords(text);
@@ -115,7 +110,7 @@ int main()
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
 	printf("\n elapsed time: %f\n", time_span.count());
 	fflush(stdout);
-//	}
+	}
 
 //	for(auto &elem : bcFreq)
 //		cout << elem.first << " --> " << elem.second << endl;
@@ -153,28 +148,3 @@ int main()
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

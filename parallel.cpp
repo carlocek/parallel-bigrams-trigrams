@@ -38,21 +38,17 @@ int main()
 	stringstream buffer1, buffer2, buffer3, buffer4, buffer5;
 	buffer1 << file1.rdbuf();
 	file1.close();
-//	string book1 = buffer1.str();
 	buffer2 << file2.rdbuf();
 	file2.close();
-//	string book2 = buffer2.str();
 	buffer3 << file3.rdbuf();
 	file3.close();
-//	string book3 = buffer3.str();
 	buffer4 << file4.rdbuf();
 	file4.close();
-//	string book4 = buffer4.str();
 	buffer5 << file5.rdbuf();
 	file5.close();
-//	string book5 = buffer5.str();
 
 	string text = buffer1.str() + buffer2.str() + buffer3.str() + buffer4.str() + buffer5.str();
+//	string text = buffer1.str();
 
 	chrono::high_resolution_clock::time_point t1, t2;
 	chrono::duration<double> time_span;
@@ -72,28 +68,16 @@ int main()
 	unordered_map<string, int> bwFreq[nthreads];
 	unordered_map<string, int> twFreq[nthreads];
 
-	//padding on text to ensure coverage of whole text
-	while(text.size() % nthreads != 0)
-	{
-		text += " ";
-	}
-
 	int textLength = text.size();
 	cout << textLength << endl;
 
-//	for(int it = 0; it < 10; it++)
-//	{
+	for(int it = 0; it < 10; it++)
+	{
 	t1 = chrono::high_resolution_clock::now();
 
 	//compute words vector
 //	vector<string> wordsReduction = parallelTokenizeWords(text, textLength, nthreads);
 	vector<string> wordsReduction = sequentialTokenizeWords(text);
-
-	//padding on words vector to ensure coverage of whole vector
-	while(wordsReduction.size() % nthreads != 0)
-	{
-		wordsReduction.push_back("%");
-	}
 
 	int wordsLength = wordsReduction.size();
 //	cout << wordsLength << endl;
@@ -138,10 +122,9 @@ int main()
 		string tcBuf;
 		char cc; //current character
 		//private buffer for updating map of bigrams of words
-		string bwBuf[2];
+		string bwBuf;
 		//private buffer for updating map of trigrams of words
-		string twBuf[3];
-		string tmp;
+		string twBuf;
 
 		#pragma omp barrier
 		for(int i = bcstart; i < bcend; i++)
@@ -178,28 +161,26 @@ int main()
 		{
 //			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);
 //			fflush(stdout);
-			tmp = "";
+			bwBuf = "";
 			for(int j = 0; j < 2; j++)
 			{
-				bwBuf[j] = wordsReduction[i+j];
-				tmp += bwBuf[j];
-				tmp += " ";
+				bwBuf += wordsReduction[i+j];
+				bwBuf += " ";
 			}
-			bwFreq[tid][tmp]++;
+			bwFreq[tid][bwBuf]++;
 		}
 
 		for(int i = twstart; i < twend; i++)
 		{
 //			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);
 //			fflush(stdout);
-			tmp = "";
+			twBuf = "";
 			for(int j = 0; j < 3; j++)
 			{
-				twBuf[j] = wordsReduction[i+j];
-				tmp += twBuf[j];
-				tmp += " ";
+				twBuf += wordsReduction[i+j];
+				twBuf += " ";
 			}
-			twFreq[tid][tmp]++;
+			twFreq[tid][twBuf]++;
 		}
 	}
 	//reduction
@@ -216,10 +197,9 @@ int main()
 	}
 	t2 = chrono::high_resolution_clock::now();
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
-//	parallelTimes[it] = time_span.count();
 	printf("\n elapsed time: %f\n", time_span.count());
 	fflush(stdout);
-//	}
+	}
 
 	//PRINT RESULTS
 //	for(auto elem : bcFreqReduction)
@@ -258,28 +238,3 @@ int main()
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -38,19 +38,14 @@ int main()
 	stringstream buffer1, buffer2, buffer3, buffer4, buffer5;
 	buffer1 << file1.rdbuf();
 	file1.close();
-//	string book1 = buffer1.str();
 	buffer2 << file2.rdbuf();
 	file2.close();
-//	string book2 = buffer2.str();
 	buffer3 << file3.rdbuf();
 	file3.close();
-//	string book3 = buffer3.str();
 	buffer4 << file4.rdbuf();
 	file4.close();
-//	string book4 = buffer4.str();
 	buffer5 << file5.rdbuf();
 	file5.close();
-//	string book5 = buffer5.str();
 
 	string text = buffer1.str() + buffer2.str() + buffer3.str() + buffer4.str() + buffer5.str();
 
@@ -104,21 +99,20 @@ int main()
 		for(int i = pos[tid]; i < pos[tid+1]; i++)
 		{
 			c = text[i];
-			if(isalpha(c) || isspace(c))
+
+			if (isspace(c))
 			{
-				if (isspace(c))
+				if(!word.empty())
 				{
-					if(!word.empty())
-					{
-						words[tid].push_back(word);
-						word.clear();
-					}
-				}
-				else
-				{
-					word += c;
+					words[tid].push_back(word);
+					word.clear();
 				}
 			}
+			else if(isalpha(c))
+			{
+				word += c;
+			}
+
 		}
 
 		#pragma omp barrier
@@ -287,28 +281,3 @@ int main()
 
 	return 0;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

@@ -52,7 +52,7 @@ int main()
 	chrono::high_resolution_clock::time_point t1, t2;
 	chrono::duration<double> time_span;
 
-	int nthreads = 8;
+	int nthreads = 16;
 	omp_set_dynamic(0);
 	omp_set_num_threads(nthreads);
 
@@ -90,21 +90,25 @@ int main()
 	//declaration of private vector to be reduced
 	vector<string> words[nthreads];
 
-	#pragma omp parallel default(none) shared(pos, words, text, textLength, wordsReduction, bcFreq, tcFreq, bwFreq, twFreq)
+	#pragma omp parallel default(none) shared(pos, words, text, textLength, wordsReduction, bcFreq, tcFreq, bwFreq, twFreq, bcFreqReduction, tcFreqReduction, bwFreqReduction, twFreqReduction)
 	{
 		int tid = omp_get_thread_num();
 		int nth = omp_get_num_threads();
+		int start = pos[tid];
+		int end = pos[tid+1];
 		string word;
+		int j = 0;
 		char c;
-		for(int i = pos[tid]; i < pos[tid+1]; i++)
+		for(int i = start; i < end; i++)
 		{
 			c = text[i];
-
-			if (isspace(c))
+			if(isspace(c))
 			{
 				if(!word.empty())
 				{
-					words[tid].push_back(word);
+					words[tid].resize(words[tid].size() + word.size());
+					words[tid][j].insert(words[tid][j].end(), word.begin(), word.end());
+					j++;
 					word.clear();
 				}
 			}
@@ -112,8 +116,8 @@ int main()
 			{
 				word += c;
 			}
-
 		}
+		words[tid].resize(j);
 
 		#pragma omp barrier
 
@@ -121,12 +125,9 @@ int main()
 		{
 			for(int i = 0; i < nth; i++)
 			{
-				for(auto w : words[i])
-					wordsReduction.push_back(w);
-			}
-			while(wordsReduction.size() % nth != 0)
-			{
-				wordsReduction.push_back("%");
+				wordsReduction.reserve(wordsReduction.size() + words[i].size());
+				wordsReduction.insert(wordsReduction.end(), words[i].begin(), words[i].end());
+		//		move(words[i].begin(), words[i].end(), back_inserter(wordsReduction));
 			}
 		}
 		int wordsLength = wordsReduction.size();
@@ -225,19 +226,36 @@ int main()
 			}
 			twFreq[tid][tmp]++;
 		}
+
+		#pragma omp barrier
+		for(int i = 0; i < nth; i++)
+		{
+			#pragma omp sections
+			{
+				#pragma omp section
+				{
+				for(auto b : bcFreq[i])
+					bcFreqReduction[b.first] += b.second;
+				}
+				#pragma omp section
+				{
+				for(auto t : tcFreq[i])
+					tcFreqReduction[t.first] += t.second;
+				}
+				#pragma omp section
+				{
+				for(auto b : bwFreq[i])
+					bwFreqReduction[b.first] += b.second;
+				}
+				#pragma omp section
+				{
+				for(auto t : twFreq[i])
+					twFreqReduction[t.first] += t.second;
+				}
+			}
+		}
 	}
 	//reduction
-	for(int i = 0; i < nthreads; i++)
-	{
-		for(auto b : bcFreq[i])
-			bcFreqReduction[b.first] += b.second;
-		for(auto t : tcFreq[i])
-			tcFreqReduction[t.first] += t.second;
-		for(auto b : bwFreq[i])
-			bwFreqReduction[b.first] += b.second;
-		for(auto t : twFreq[i])
-			twFreqReduction[t.first] += t.second;
-	}
 	t2 = chrono::high_resolution_clock::now();
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
 	printf("\n elapsed time: %f\n", time_span.count());

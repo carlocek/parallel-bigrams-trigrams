@@ -50,16 +50,22 @@ vector<string> parallelTokenizeWords(string& text, int textLength, int nthreads)
 	#pragma omp parallel default(none) shared(text, pos, words, wordsReduction)
 	{
 		int tid = omp_get_thread_num();
+		int start = pos[tid];
+		int end = pos[tid+1];
 		string word;
+		int j = 0;
 		char c;
-		for(int i = pos[tid]; i < pos[tid+1]; i++)
+		for(int i = start; i < end; i++)
 		{
 			c = text[i];
-			if (isspace(c))
+			if(isspace(c))
 			{
 				if(!word.empty())
 				{
-					words[tid].push_back(word);
+					//resize adding the space needed for the word to be added then insert to avoid multiple memory reallocations
+					words[tid].resize(words[tid].size() + word.size());
+					words[tid][j].insert(words[tid][j].end(), word.begin(), word.end());
+					j++;
 					word.clear();
 				}
 			}
@@ -68,12 +74,14 @@ vector<string> parallelTokenizeWords(string& text, int textLength, int nthreads)
 				word += c;
 			}
 		}
+		words[tid].resize(j);
 	}
-	//reduction
+	//reduction phase
 	for(int i = 0; i < nthreads; i++)
 	{
-		for(auto w : words[i])
-			wordsReduction.push_back(w);
+		//resize and insert whole vector at every iteration
+		wordsReduction.resize(wordsReduction.size() + words[i].size());
+		wordsReduction.insert(wordsReduction.end(), words[i].begin(), words[i].end());
 	}
 	return wordsReduction;
 }

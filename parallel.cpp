@@ -13,19 +13,9 @@
 #include <ctime>
 #include <numeric>
 #include <cmath>
-
 #include "utilities.h"
 
-//#define CACHE_LINE_SIZE 64
-
 using namespace std;
-
-//template<typename T>
-//struct alignas(CACHE_LINE_SIZE) cache_line_storage
-//{
-//    alignas(CACHE_LINE_SIZE) T data;
-//    char pad[CACHE_LINE_SIZE > sizeof(T) ? CACHE_LINE_SIZE - sizeof(T) : 1];
-//};
 
 int main()
 {
@@ -47,8 +37,8 @@ int main()
 	buffer5 << file5.rdbuf();
 	file5.close();
 
-	string text = buffer1.str() + buffer2.str() + buffer3.str() + buffer4.str() + buffer5.str();
 //	string text = buffer1.str();
+	string text = buffer1.str() + buffer2.str() + buffer3.str() + buffer4.str() + buffer5.str();
 
 	chrono::high_resolution_clock::time_point t1, t2;
 	chrono::duration<double> time_span;
@@ -71,24 +61,15 @@ int main()
 	int textLength = text.size();
 	cout << textLength << endl;
 
-	for(int it = 0; it < 10; it++)
+	for(int it = 0; it < 20; it++)
 	{
 	t1 = chrono::high_resolution_clock::now();
 
 	//compute words vector
-//	vector<string> wordsReduction = parallelTokenizeWords(text, textLength, nthreads);
-	vector<string> wordsReduction = sequentialTokenizeWords(text);
-
+	vector<string> wordsReduction = parallelTokenizeWords(text, textLength, nthreads);
 	int wordsLength = wordsReduction.size();
-//	cout << wordsLength << endl;
 
-//	int chunksize = (int)(textLength/nthreads);
-//	cout << chunksize << endl;
-
-//	int wchunksize = (int)(wordsLength/nthreads);
-//	cout << wchunksize << endl;
-
-	#pragma omp parallel default(none) shared(text, textLength, wordsReduction, wordsLength, bcFreq, tcFreq, bwFreq, twFreq)
+	#pragma omp parallel default(none) shared(text, textLength, wordsReduction, wordsLength, bcFreq, tcFreq, bwFreq, twFreq, bcFreqReduction, tcFreqReduction, bwFreqReduction, twFreqReduction)
 	{
 		int tid = omp_get_thread_num();
 		int nth = omp_get_num_threads();
@@ -126,11 +107,8 @@ int main()
 		//private buffer for updating map of trigrams of words
 		string twBuf;
 
-		#pragma omp barrier
 		for(int i = bcstart; i < bcend; i++)
 		{
-//			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);
-//			fflush(stdout);
 			bcBuf = "";
 			for(int j = 0; j < 2; j++)
 			{
@@ -144,8 +122,6 @@ int main()
 
 		for(int i = tcstart; i < tcend; i++)
 		{
-//			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);
-//			fflush(stdout);
 			tcBuf = "";
 			for(int j = 0; j < 3; j++)
 			{
@@ -159,8 +135,6 @@ int main()
 
 		for(int i = bwstart; i < bwend; i++)
 		{
-//			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);
-//			fflush(stdout);
 			bwBuf = "";
 			for(int j = 0; j < 2; j++)
 			{
@@ -172,8 +146,6 @@ int main()
 
 		for(int i = twstart; i < twend; i++)
 		{
-//			printf("thread id: %d, h&&ling iteration %d\n", omp_get_thread_num(), i);
-//			fflush(stdout);
 			twBuf = "";
 			for(int j = 0; j < 3; j++)
 			{
@@ -182,18 +154,35 @@ int main()
 			}
 			twFreq[tid][twBuf]++;
 		}
-	}
-	//reduction
-	for(int i = 0; i < nthreads; i++)
-	{
-		for(auto b : bcFreq[i])
-			bcFreqReduction[b.first] += b.second;
-		for(auto t : tcFreq[i])
-			tcFreqReduction[t.first] += t.second;
-		for(auto b : bwFreq[i])
-			bwFreqReduction[b.first] += b.second;
-		for(auto t : twFreq[i])
-			twFreqReduction[t.first] += t.second;
+
+		#pragma omp barrier
+		//reduction
+		for(int i = 0; i < nth; i++)
+		{
+			#pragma omp sections
+			{
+				#pragma omp section
+				{
+				for(auto b : bcFreq[i])
+					bcFreqReduction[b.first] += b.second;
+				}
+				#pragma omp section
+				{
+				for(auto t : tcFreq[i])
+					tcFreqReduction[t.first] += t.second;
+				}
+				#pragma omp section
+				{
+				for(auto b : bwFreq[i])
+					bwFreqReduction[b.first] += b.second;
+				}
+				#pragma omp section
+				{
+				for(auto t : twFreq[i])
+					twFreqReduction[t.first] += t.second;
+				}
+			}
+		}
 	}
 	t2 = chrono::high_resolution_clock::now();
 	time_span = chrono::duration_cast<chrono::duration<double>>(t2 - t1);
